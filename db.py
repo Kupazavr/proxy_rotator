@@ -20,6 +20,7 @@ class SqliteDB(DB, ABC):
         self._metadata = metadata
         self._create_db_directory()
         self._client = self._connect_to_db(self.db_name)
+
         self._metadata.bind = self._client
         self._create_tables()
         self._session = self._get_sqlite_session()()

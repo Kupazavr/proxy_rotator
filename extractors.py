@@ -8,51 +8,13 @@ from helpers import chunkify
 import gc
 from user_agents import user_agents_list
 import random
+from storage import Proxy
 
 format_message = u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s'
 logging.basicConfig(format=format_message, level=logging.DEBUG)
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("connectionpool").setLevel(logging.WARNING)
-
-
-class Proxy:
-    uniq_key = 'address'
-    uniq_key_type = str
-    mandatory_fields = {'error_count': int,
-                        'prev_request_time': float,
-                        'threads_using': int,
-                        'prev_error_time': float}
-
-    def __init__(self, address: str, **user_fields):
-        self.address = address
-        self._logger = logging.getLogger('proxy_instance')
-        self.check_user_arguments(**user_fields)
-
-    def check_user_arguments(self, **user_fields) -> None:
-        """
-        Checking arguments provided by user
-        """
-        if type(self.address) != self.uniq_key_type:
-            raise Exception('Proxy address is not string')
-
-        for mandatory_field, field_valid_types in self.mandatory_fields.items():
-            # set mandatory field with None value
-            setattr(self, mandatory_field, None)
-            if mandatory_field in user_fields:
-                same_user_field = user_fields.get(mandatory_field)
-                if type(same_user_field) is field_valid_types:
-                    # If user provide mandatory field with correct type, set it as private
-                    setattr(self, mandatory_field, same_user_field)
-                else:
-                    self._logger.warning('Type {} for {} argument is incorrect | '
-                                         'Only {} types are correct'.format(type(same_user_field), mandatory_field,
-                                                                            field_valid_types))
-            else:
-                self._logger.warning(f'Field {mandatory_field} not provided')
-
-    def __repr__(self):
-        return f'<Proxy(address={self.address})>'
 
 
 class ProxyExtractor(ABC):
